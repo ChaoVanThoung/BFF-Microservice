@@ -6,6 +6,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.authentication.logout.RedirectServerLogoutSuccessHandler;
 import org.springframework.security.web.server.authentication.logout.ServerLogoutSuccessHandler;
 
@@ -25,7 +26,8 @@ public class SecurityConfig {
                         .anyExchange().authenticated()
                 )
                 // Enable OAuth2 Login (Authorization Code Flow with PKCE)
-                .oauth2Login(Customizer.withDefaults())
+                .oauth2Login(oauth2 -> oauth2
+                        .authenticationSuccessHandler(new RedirectServerAuthenticationSuccessHandler("/")))
 
                 // Enable OAuth2 Client for token relay
                 .oauth2Client(Customizer.withDefaults())
