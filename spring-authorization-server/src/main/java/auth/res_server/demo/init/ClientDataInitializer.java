@@ -135,6 +135,52 @@ public class ClientDataInitializer implements CommandLineRunner {
 
 
         // === API Gateway Client (Authorization Code for Token Relay) ===
+//        if (registeredClientRepository.findByClientId("api-gateway") == null) {
+//            RegisteredClient apiGatewayClient = RegisteredClient.withId(UUID.randomUUID().toString())
+//                    .clientId("api-gateway")
+//                    .clientName("API Gateway")
+//                    .clientSecret(passwordEncoder.encode("gateway-secret"))
+//                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+//                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+//                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+//                    .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+//                    .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+//
+//                    // Fixed Redirect URIs to match your Gateway application.yml
+//                    // Gateway port is 8080, registrationId is gateway-client
+//                    .redirectUri("http://localhost:8080/login/oauth2/code/gateway-client")
+//                    .redirectUri("http://127.0.0.1:8080/login/oauth2/code/gateway-client")
+//
+//                    // Keep your BFF/Frontend URIs if needed
+//                    .redirectUri("http://localhost:3000/api/auth/callback")
+//
+//                    // In the api-gateway client section
+//                    .redirectUri("http://localhost:8080/login/oauth2/code/gateway-client")
+//                    .redirectUri("http://localhost:3000/auth/callback")
+//                    .postLogoutRedirectUri("http://localhost:3000/login")
+//
+////                    .postLogoutRedirectUri("http://localhost:8080/")
+//                    .scope("openid")
+//                    .scope("profile")
+//                    .scope("email")
+//                    .scope("read")
+//                    .scope("write")
+//                    .clientSettings(ClientSettings.builder()
+//                            .requireAuthorizationConsent(false)
+//                            .requireProofKey(true) // Required for PKCE
+//                            .build())
+//                    .tokenSettings(TokenSettings.builder()
+//                            .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+//                            .accessTokenTimeToLive(Duration.ofMinutes(30))
+//                            .refreshTokenTimeToLive(Duration.ofDays(7))
+//                            .reuseRefreshTokens(false)
+//                            .build())
+//                    .build();
+//
+//            registeredClientRepository.save(apiGatewayClient);
+//            System.out.println("Created API Gateway client: api-gateway");
+//        }
+
         if (registeredClientRepository.findByClientId("api-gateway") == null) {
             RegisteredClient apiGatewayClient = RegisteredClient.withId(UUID.randomUUID().toString())
                     .clientId("api-gateway")
@@ -146,23 +192,22 @@ public class ClientDataInitializer implements CommandLineRunner {
                     .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                     .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
 
-                    // Fixed Redirect URIs to match your Gateway application.yml
-                    // Gateway port is 8080, registrationId is gateway-client
+                    // ONLY Gateway redirect URIs (port 8080)
                     .redirectUri("http://localhost:8080/login/oauth2/code/gateway-client")
                     .redirectUri("http://127.0.0.1:8080/login/oauth2/code/gateway-client")
 
-                    // Keep your BFF/Frontend URIs if needed
-                    .redirectUri("http://localhost:3000/api/auth/callback")
+                    // Post-logout redirect to Gateway
+                    .postLogoutRedirectUri("http://localhost:8080/login")
+                    .postLogoutRedirectUri("http://127.0.0.1:8080/login")
 
-                    .postLogoutRedirectUri("http://localhost:8080/")
                     .scope("openid")
                     .scope("profile")
                     .scope("email")
                     .scope("read")
                     .scope("write")
                     .clientSettings(ClientSettings.builder()
-                            .requireAuthorizationConsent(false)
-                            .requireProofKey(true) // Required for PKCE
+                            .requireAuthorizationConsent(false)  // Skip consent for BFF
+                            .requireProofKey(true)  // PKCE enabled
                             .build())
                     .tokenSettings(TokenSettings.builder()
                             .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
@@ -173,7 +218,8 @@ public class ClientDataInitializer implements CommandLineRunner {
                     .build();
 
             registeredClientRepository.save(apiGatewayClient);
-            System.out.println("Created API Gateway client: api-gateway");
+            System.out.println("Created API Gateway client with redirect URIs:");
+            System.out.println("  - http://localhost:8080/login/oauth2/code/gateway-client");
         }
 
 

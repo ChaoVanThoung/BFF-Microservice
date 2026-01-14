@@ -1,3 +1,71 @@
+#server:
+#  port: 8080
+#
+#spring:
+#  application:
+#    name: Api-Gateway
+#
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          gateway-client:
+#            provider: auth-server
+#            client-id: ${OAUTH2_CLIENT_ID:api-gateway}
+#            client-secret: ${OAUTH2_CLIENT_SECRET:gateway-secret}
+#            authorization-grant-type: authorization_code
+#            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+#            scope:
+#              - openid
+#              - profile
+#              - email
+#              - read
+#              - write
+#            # IMPORTANT: Enable PKCE since your client requires it
+#            client-authentication-method: client_secret_basic
+#
+#        provider:
+#          auth-server:
+#            # RECOMMENDED: Use issuer-uri for automatic endpoint discovery
+#            issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:9000}
+#            user-name-attribute: sub
+#
+#            # ALTERNATIVE: Manual endpoint configuration (use if issuer-uri doesn't work)
+#            # Comment out issuer-uri above and uncomment these:
+#            # authorization-uri: ${OAUTH2_ISSUER_URI:http://localhost:9000}/oauth2/authorize
+#            # token-uri: ${OAUTH2_ISSUER_URI:http://localhost:9000}/oauth2/token
+#            # jwk-set-uri: ${OAUTH2_ISSUER_URI:http://localhost:9000}/oauth2/jwks
+#            # user-info-uri: ${OAUTH2_ISSUER_URI:http://localhost:9000}/userinfo
+#
+#      # Add Resource Server for token validation
+#      resourceserver:
+#        jwt:
+#          issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:9000}
+#
+#  cloud:
+#    gateway:
+#      # Optional: Add global filters
+#      default-filters:
+#        - TokenRelay=
+#
+#      discovery:
+#        locator:
+#          enabled: false
+#          lower-case-service-id: true
+#
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka/
+#
+## Logging for debugging OAuth2 flow
+#logging:
+#  level:
+#    org.springframework.security: DEBUG
+#    org.springframework.cloud.gateway: DEBUG
+#    org.springframework.web.reactive.function.client: DEBUG
+
+
 server:
   port: 8080
 
@@ -14,6 +82,7 @@ spring:
             client-id: ${OAUTH2_CLIENT_ID:api-gateway}
             client-secret: ${OAUTH2_CLIENT_SECRET:gateway-secret}
             authorization-grant-type: authorization_code
+            # CRITICAL: Redirect URI must point to Gateway (8080), not Next.js
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             scope:
               - openid
@@ -21,33 +90,20 @@ spring:
               - email
               - read
               - write
-            # IMPORTANT: Enable PKCE since your client requires it
             client-authentication-method: client_secret_basic
 
         provider:
           auth-server:
-            # RECOMMENDED: Use issuer-uri for automatic endpoint discovery
             issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:9000}
             user-name-attribute: sub
 
-            # ALTERNATIVE: Manual endpoint configuration (use if issuer-uri doesn't work)
-            # Comment out issuer-uri above and uncomment these:
-            # authorization-uri: ${OAUTH2_ISSUER_URI:http://localhost:9000}/oauth2/authorize
-            # token-uri: ${OAUTH2_ISSUER_URI:http://localhost:9000}/oauth2/token
-            # jwk-set-uri: ${OAUTH2_ISSUER_URI:http://localhost:9000}/oauth2/jwks
-            # user-info-uri: ${OAUTH2_ISSUER_URI:http://localhost:9000}/userinfo
-
-      # Add Resource Server for token validation
       resourceserver:
         jwt:
           issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:9000}
 
   cloud:
     gateway:
-      # Optional: Add global filters
-      default-filters:
-        - TokenRelay=
-
+      # Remove the default-filters from here
       discovery:
         locator:
           enabled: false
@@ -58,9 +114,21 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka/
 
-# Logging for debugging OAuth2 flow
+# Logging for debugging
 logging:
   level:
     org.springframework.security: DEBUG
     org.springframework.cloud.gateway: DEBUG
     org.springframework.web.reactive.function.client: DEBUG
+
+# Application Configuration
+# IMPORTANT: All URLs now point to Gateway (8080)
+app:
+  frontend:
+    # This is where the frontend is HOSTED, but users don't access it directly
+    url: ${FRONTEND_URL:http://localhost:3000}
+  gateway:
+    # This is the PUBLIC URL that users access
+    url: ${GATEWAY_URL:http://localhost:8080}
+  auth-server:
+    url: ${OAUTH2_ISSUER_URI:http://localhost:9000}
