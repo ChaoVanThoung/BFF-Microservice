@@ -1,0 +1,33 @@
+
+services:
+  product-service-db:
+    image: "mongodb/mongodb-community-server:latest"
+    container_name: product-service-db
+    ports:
+      - "27168:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=thoung
+      - MONGO_INITDB_ROOT_PASSWORD=qwer
+    volumes:
+      - product_service_db_data_vol:/data/db/
+      - product_service_db_vol:/var/log/mongodb/
+    networks:
+      - gateway-demo
+    
+  user-service-db:
+    image: postgres:17.5-bullseye
+    container_name: user-service-db
+    environment:
+      POSTGRES_USER: thoung
+      POSTGRES_PASSWORD: qwer
+      POSTGRES_DB: user_service_db
+    ports:
+      - "1111:5432"
+    networks:
+      - gateway-demo
+volumes:
+  product_service_db_data_vol:
+  product_service_db_vol:
+networks:
+  gateway-demo:
+    external: true
