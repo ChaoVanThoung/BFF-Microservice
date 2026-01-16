@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -11,11 +10,11 @@ import { AlertCircle } from "lucide-react"
 interface ProductDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (name: string, price: string) => void
+  onSubmit: (title: string, price: string) => void
 }
 
 export function ProductDialog({ open, onOpenChange, onSubmit }: ProductDialogProps) {
-  const [name, setName] = useState("")
+  const [title, setTitle] = useState("")
   const [price, setPrice] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -24,8 +23,8 @@ export function ProductDialog({ open, onOpenChange, onSubmit }: ProductDialogPro
     e.preventDefault()
     setError("")
 
-    if (!name.trim()) {
-      setError("Product name is required")
+    if (!title.trim()) {
+      setError("Product title is required")
       return
     }
 
@@ -35,8 +34,8 @@ export function ProductDialog({ open, onOpenChange, onSubmit }: ProductDialogPro
     }
 
     setLoading(true)
-    onSubmit(name.trim(), price.trim())
-    setName("")
+    onSubmit(title.trim(), price.trim())
+    setTitle("")
     setPrice("")
     setError("")
     setLoading(false)
@@ -53,12 +52,12 @@ export function ProductDialog({ open, onOpenChange, onSubmit }: ProductDialogPro
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Product Name</label>
+            <label className="text-sm font-medium">Product Title</label>
             <Input
               type="text"
-              placeholder="Enter product name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter product title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               disabled={loading}
               className="h-10"
             />

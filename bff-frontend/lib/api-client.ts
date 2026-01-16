@@ -13,23 +13,29 @@ interface UserInfo {
   email?: string;
   name?: string;
   sub?: string;
+  givenName?: string;
+  familyName?: string;
+}
+
+interface Product {
+  id: string;
+  title: string;
+  price: number;
 }
 
 /**
  * Generic API call function for BFF pattern
- * All requests go through the API Gateway with session cookies
  */
 export async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   try {
-    // Ensure endpoint starts with /
     const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     
     const response = await fetch(`${API_GATEWAY_URL}${path}`, {
       ...options,
-      credentials: "include", // Always include session cookies
+      credentials: "include", // Critical: Include session cookies
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
@@ -38,15 +44,13 @@ export async function apiCall<T>(
     });
 
     if (!response.ok) {
-      // Handle authentication errors
       if (response.status === 401) {
         return {
           success: false,
-          error: "401: Unauthorized - Please log in",
+          error: "Authentication required",
         };
       }
 
-      // Handle other errors
       const errorText = await response.text();
       return {
         success: false,
@@ -70,33 +74,49 @@ export async function apiCall<T>(
 
 /**
  * Get current user information
- * Uses session-based authentication
  */
 export async function getCurrentUser(): Promise<ApiResponse<UserInfo>> {
   return apiCall<UserInfo>("/api/auth/me");
 }
 
 /**
+ * Check authentication status
+ */
+export async function checkAuthStatus(): Promise<boolean> {
+  const result = await apiCall<{ authenticated: boolean }>("/api/auth/status");
+  return result.success && result.data?.authenticated === true;
+}
+
+/**
+ * Get all products
+ */
+export async function getProducts(): Promise<ApiResponse<Product[]>> {
+  return apiCall<Product[]>("/api/products");
+}
+
+/**
+ * Create a new product
+ */
+export async function createProduct(title: string, price: number): Promise<ApiResponse<Product>> {
+  return apiCall<Product>("/api/products", {
+    method: "POST",
+    body: JSON.stringify({ title, price }),
+  });
+}
+
+/**
  * Logout the current user
- * Invalidates session and clears cookies
  */
 export async function logout(): Promise<void> {
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/api/auth/logout`, {
+    await fetch(`${API_GATEWAY_URL}/logout`, {
       method: "POST",
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
-
-    // Always redirect to login, even if logout fails
-    // This ensures user is logged out on frontend
-    window.location.href = "/login";
-    
   } catch (error) {
-    console.error("Logout failed:", error);
-    // Still redirect to login page
+    console.error("Logout error:", error);
+  } finally {
+    // Always redirect to login page (through Gateway to clear session)
     window.location.href = "/login";
   }
 }

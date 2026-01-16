@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.factory.TokenRelayGatewayFilterFactory;
 import org.springframework.cloud.gateway.route.RouteLocator;
-import org.springframework.cloud.gateway.route.builder.GatewayFilterSpec;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,60 +20,51 @@ public class GatewayConfig {
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
+
+                // Authentication endpoints - HIGHEST PRIORITY (handled by Gateway controllers)
+                .route("auth-endpoints", r -> r
+                        .order(-100) // Very high priority
+                        .path("/api/auth/**")
+                        .filters(f -> f.stripPrefix(0)) // Don't modify the path
+                        .uri("no://op") // No-op URI, handled by @RestController
+                )
+
+                // User Service API Routes
                 .route("user-service", r -> r
-                        .path("/users/**")
+                        .order(0)
+                        .path("/api/users/**")
                         .filters(f -> f
-                                .rewritePath("/users(?<segment>.*)", "/api/v1/users${segment}")
-                                .filter(tokenRelayGatewayFilterFactory.apply())
+                                        .rewritePath("/api/users(?<segment>.*)", "/api/v1/users${segment}")
+                                // Removed token relay - using session-based auth instead
                         )
                         .uri("http://localhost:8081")
                 )
 
-//                .route("product-service", r -> r
-//                        .path("/products/**")
-//                        .filters(f -> f
-//                                .rewritePath("/products(?<segment>.*)", "/api/v1/products${segment}")
-//                                .filter(tokenRelayGatewayFilterFactory.apply())
-//                        )
-//                        .uri("http://localhost:8082")
-//                )
-
+                // Product Service API Routes
                 .route("product-service", r -> r
-                        .path("/api/products/**") // use /api prefix
+                        .order(0)
+                        .path("/api/products/**")
                         .filters(f -> f
-                                .rewritePath("/api/products(?<segment>.*)", "/api/v1/products${segment}")
-                                .filter(tokenRelayGatewayFilterFactory.apply())
+                                        .rewritePath("/api/products(?<segment>.*)", "/api/v1/products${segment}")
+                                // Removed token relay - using session-based auth instead
                         )
                         .uri("http://localhost:8082")
                 )
 
-                .route("nextjs-bff", r -> r
-                        .path("/bff/**")
-                        .filters(f -> f
-                                .tokenRelay()
-                                .rewritePath("/bff(?<segment>/?.*)", "${segment}"))
-                        .uri(frontendUrl))
-
+                // Next.js Static Assets (high priority, no auth required)
                 .route("nextjs-static", r -> r
+                        .order(100)
                         .path("/_next/**", "/favicon.ico", "/images/**", "/fonts/**")
-                        .uri(frontendUrl))
-
-                .route("nextjs-products-pages", r -> r
-                        .order(-1)
-                        .path("/products/**") // Match the /products path
-                        .filters(f -> f.tokenRelay()) // Pass the OAuth2 token to the backend if needed
-                        .uri(frontendUrl) // Forward to http://localhost:3000
+                        .uri(frontendUrl)
                 )
 
+                // Next.js Pages (lowest priority, catch-all)
                 .route("nextjs-pages", r -> r
                         .order(1000)
                         .path("/**")
-                        .and()
-                        .not(p -> p.path("/logout", "/logout-success", "/oauth2/**", "/error"))
-                        .filters(GatewayFilterSpec::tokenRelay)
-                        .uri(frontendUrl))
-
-
+                        .filters(f -> f.tokenRelay())
+                        .uri(frontendUrl)
+                )
 
                 .build();
     }

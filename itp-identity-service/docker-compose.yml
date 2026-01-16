@@ -1,0 +1,16 @@
+services:
+  oauth2-db:
+    image: postgres:17.5-bullseye
+    container_name: oauth2-db
+    environment:
+      POSTGRES_USER: itpusr
+      POSTGRES_PASSWORD: itp@168
+    ports:
+      - "2222:5432"
+    volumes:
+      - ./init_scripts/pg_itp_iam_init.sql:/docker-entrypoint-initdb.d/pg_itp_iam_init.sql
+      - pg-itp-iam-vol:/var/lib/postgresql/data
+
+# Create docker volume
+volumes:
+  pg-itp-iam-vol:

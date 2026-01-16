@@ -2,16 +2,14 @@ package co.istad.Api_Gateway.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
@@ -23,67 +21,83 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
 
-    @Value("${app.frontend.url}")
-    private String frontendUrl;
-
-    @Value("${app.gateway.url}")
-    private String gatewayUrl;
-
     /**
-     * Initiates OAuth2 login flow
-     * Returns the OAuth2 authorization URL for the frontend to redirect to
+     * Get current user information
+     * Works with both form-based authentication and OAuth2
      */
     @GetMapping("/me")
-    public Mono<Map<String, Object>> getCurrentUser(
-            @AuthenticationPrincipal OidcUser oidcUser,
-            @RegisteredOAuth2AuthorizedClient("api-gateway-client") OAuth2AuthorizedClient authorizedClient) {
+    public Mono<Map<String, Object>> getCurrentUser() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(securityContext -> {
+                    Authentication authentication = securityContext.getAuthentication();
 
-        Map<String, Object> response = new HashMap<>();
+                    if (authentication == null || !authentication.isAuthenticated()) {
+                        throw new RuntimeException("Not authenticated");
+                    }
 
-        if (oidcUser == null) {
-            response.put("authenticated", false);
-            response.put("user", null);
-            return Mono.just(response);
-        }
+                    Map<String, Object> userInfo = new HashMap<>();
+                    Object principal = authentication.getPrincipal();
 
-        // Build user info from OIDC claims (don't expose raw token)
-        Map<String, Object> user = new HashMap<>();
-        user.put("sub", oidcUser.getSubject());
-        user.put("email", oidcUser.getEmail());
-        user.put("name", oidcUser.getFullName());
-        user.put("given_name", oidcUser.getGivenName());
-        user.put("family_name", oidcUser.getFamilyName());
+                    // Handle OAuth2 user (OidcUser)
+                    if (principal instanceof OidcUser oidcUser) {
+                        userInfo.put("username", oidcUser.getPreferredUsername());
+                        userInfo.put("email", oidcUser.getEmail());
+                        userInfo.put("name", oidcUser.getFullName());
+                        userInfo.put("sub", oidcUser.getSubject());
+                        userInfo.put("givenName", oidcUser.getGivenName());
+                        userInfo.put("familyName", oidcUser.getFamilyName());
+                        userInfo.put("authType", "oauth2");
+                    }
+                    // Handle form-based authentication (UserDetails)
+                    else if (principal instanceof UserDetails userDetails) {
+                        userInfo.put("username", userDetails.getUsername());
+                        userInfo.put("name", userDetails.getUsername());
+                        userInfo.put("email", userDetails.getUsername() + "@example.com");
+                        userInfo.put("authType", "form");
+                    }
+                    // Handle string principal (username)
+                    else if (principal instanceof String username) {
+                        userInfo.put("username", username);
+                        userInfo.put("name", username);
+                        userInfo.put("authType", "form");
+                    }
 
-        // Get custom claims if present
-        if (oidcUser.getClaim("uuid") != null) {
-            user.put("uuid", oidcUser.getClaim("uuid"));
-        }
-        if (oidcUser.getClaim("roles") != null) {
-            user.put("roles", oidcUser.getClaim("roles"));
-        }
-        if (oidcUser.getClaim("permissions") != null) {
-            user.put("permissions", oidcUser.getClaim("permissions"));
-        }
-
-        response.put("authenticated", true);
-        response.put("user", user);
-
-        // Include token expiry info (not the token itself)
-        if (authorizedClient != null && authorizedClient.getAccessToken() != null) {
-            response.put("expiresAt", authorizedClient.getAccessToken().getExpiresAt());
-        }
-
-        return Mono.just(response);
+                    userInfo.put("authenticated", true);
+                    log.debug("Returning user info: {}", userInfo);
+                    return userInfo;
+                })
+                .switchIfEmpty(Mono.error(new RuntimeException("Not authenticated")));
     }
 
     /**
-     * Simple endpoint to check if user is authenticated
-     * Returns 200 if authenticated, 401 if not (handled by security config)
+     * Check if user is authenticated
      */
     @GetMapping("/status")
-    public Mono<Map<String, Object>> getAuthStatus(@AuthenticationPrincipal OidcUser oidcUser) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("authenticated", oidcUser != null);
+    public Mono<Map<String, Object>> getAuthStatus() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(context -> {
+                    Authentication auth = context.getAuthentication();
+                    Map<String, Object> status = new HashMap<>();
+                    boolean isAuthenticated = auth != null && auth.isAuthenticated()
+                            && !"anonymousUser".equals(auth.getPrincipal());
+
+                    status.put("authenticated", isAuthenticated);
+                    if (isAuthenticated) {
+                        status.put("username", auth.getName());
+                    }
+                    return status;
+                })
+                .defaultIfEmpty(Map.of("authenticated", false));
+    }
+
+    /**
+     * Logout endpoint
+     */
+    @PostMapping("/logout")
+    public Mono<Map<String, String>> logout() {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Logout successful");
+        response.put("redirectUrl", "/login");
         return Mono.just(response);
     }
 }

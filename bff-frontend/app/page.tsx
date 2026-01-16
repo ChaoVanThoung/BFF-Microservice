@@ -1,8 +1,9 @@
-"use client"
+"use client";
 
-import { ArrowRight, Star } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { ArrowRight, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -12,19 +13,34 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="text-2xl font-bold">Premium</div>
           <div className="hidden md:flex gap-8 items-center">
-            <a href="#features" className="text-muted-foreground hover:text-foreground transition">
+            <a
+              href="#features"
+              className="text-muted-foreground hover:text-foreground transition"
+            >
               Features
             </a>
-            <a href="#pricing" className="text-muted-foreground hover:text-foreground transition">
+            <a
+              href="#pricing"
+              className="text-muted-foreground hover:text-foreground transition"
+            >
               Pricing
             </a>
-            <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition">
+            <a
+              href="#testimonials"
+              className="text-muted-foreground hover:text-foreground transition"
+            >
               Testimonials
             </a>
           </div>
-          <Button variant="outline" size="sm" className="ml-auto mr-2 bg-transparent">
-            Log in
-          </Button>
+          <Link href="/login">
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto mr-2 bg-transparent"
+            >
+              Log in
+            </Button>
+          </Link>
           <Button size="sm" className="bg-primary">
             Sign up
           </Button>
@@ -41,15 +57,26 @@ export default function Home() {
                   Experience the future of shopping
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-                  Join thousands of customers discovering premium products curated just for you. Seamless checkout,
-                  exceptional quality, delivered fast.
+                  Join thousands of customers discovering premium products
+                  curated just for you. Seamless checkout, exceptional quality,
+                  delivered fast.
                 </p>
               </div>
 
               <div className="space-y-4">
-                <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
-                  <Input type="email" placeholder="Enter your email" className="h-12 text-base" />
-                  <Button size="lg" className="w-full bg-primary hover:bg-primary/90">
+                <form
+                  className="space-y-3"
+                  onSubmit={(e) => e.preventDefault()}
+                >
+                  <Input
+                    type="email"
+                    placeholder="Enter your email"
+                    className="h-12 text-base"
+                  />
+                  <Button
+                    size="lg"
+                    className="w-full bg-primary hover:bg-primary/90"
+                  >
                     Get Early Access
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -67,7 +94,9 @@ export default function Home() {
               </div>
               <div className="relative z-10 text-center">
                 <div className="text-6xl mb-4">📦</div>
-                <p className="text-muted-foreground">Premium Product Collection</p>
+                <p className="text-muted-foreground">
+                  Premium Product Collection
+                </p>
               </div>
             </div>
           </div>
@@ -77,7 +106,9 @@ export default function Home() {
       {/* Trust Section */}
       <section className="bg-muted/30 border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <p className="text-center text-sm font-semibold text-muted-foreground mb-8">TRUSTED BY LEADING BRANDS</p>
+          <p className="text-center text-sm font-semibold text-muted-foreground mb-8">
+            TRUSTED BY LEADING BRANDS
+          </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {["Nike", "Adidas", "Puma", "Asics"].map((brand) => (
               <div key={brand} className="text-muted-foreground font-semibold">
@@ -92,7 +123,9 @@ export default function Home() {
       <section id="features" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Why choose us?</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Why choose us?
+            </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Everything you need for an exceptional shopping experience
             </p>
@@ -102,32 +135,38 @@ export default function Home() {
             {[
               {
                 title: "Curated Selection",
-                description: "Handpicked products from premium brands, carefully selected for quality and style.",
+                description:
+                  "Handpicked products from premium brands, carefully selected for quality and style.",
                 icon: "⭐",
               },
               {
                 title: "Fast Shipping",
-                description: "Get your orders delivered to your door in 2-3 business days, guaranteed.",
+                description:
+                  "Get your orders delivered to your door in 2-3 business days, guaranteed.",
                 icon: "🚚",
               },
               {
                 title: "Customer Support",
-                description: "24/7 dedicated support team ready to help with any questions or concerns.",
+                description:
+                  "24/7 dedicated support team ready to help with any questions or concerns.",
                 icon: "💬",
               },
               {
                 title: "Easy Returns",
-                description: "30-day hassle-free returns. If you're not satisfied, we make it right.",
+                description:
+                  "30-day hassle-free returns. If you're not satisfied, we make it right.",
                 icon: "↩️",
               },
               {
                 title: "Secure Checkout",
-                description: "Bank-level encryption protects your payment information every time.",
+                description:
+                  "Bank-level encryption protects your payment information every time.",
                 icon: "🔒",
               },
               {
                 title: "Exclusive Deals",
-                description: "Early access to sales and exclusive discounts for our members.",
+                description:
+                  "Early access to sales and exclusive discounts for our members.",
                 icon: "🎁",
               },
             ].map((feature, i) => (
@@ -172,8 +211,12 @@ export default function Home() {
       <section id="testimonials" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">What our customers say</h2>
-            <p className="text-lg text-muted-foreground">Join thousands of satisfied shoppers</p>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              What our customers say
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Join thousands of satisfied shoppers
+            </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -187,24 +230,39 @@ export default function Home() {
               {
                 name: "Marcus Johnson",
                 role: "Regular Customer",
-                content: "Love the curated selection. It's like having a personal shopper. Highly recommend!",
+                content:
+                  "Love the curated selection. It's like having a personal shopper. Highly recommend!",
               },
               {
                 name: "Emma Rodriguez",
                 role: "Verified Buyer",
-                content: "Best online shopping experience I've had. The returns process is so easy and hassle-free.",
+                content:
+                  "Best online shopping experience I've had. The returns process is so easy and hassle-free.",
               },
             ].map((testimonial, i) => (
-              <div key={i} className="p-8 rounded-lg border border-border bg-card">
+              <div
+                key={i}
+                className="p-8 rounded-lg border border-border bg-card"
+              >
                 <div className="flex gap-1 mb-4">
                   {[...Array(5)].map((_, j) => (
-                    <Star key={j} size={16} className="fill-accent text-accent" />
+                    <Star
+                      key={j}
+                      size={16}
+                      className="fill-accent text-accent"
+                    />
                   ))}
                 </div>
-                <p className="text-foreground mb-6 leading-relaxed">"{testimonial.content}"</p>
+                <p className="text-foreground mb-6 leading-relaxed">
+                  "{testimonial.content}"
+                </p>
                 <div>
-                  <p className="font-semibold text-foreground">{testimonial.name}</p>
-                  <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                  <p className="font-semibold text-foreground">
+                    {testimonial.name}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {testimonial.role}
+                  </p>
                 </div>
               </div>
             ))}
@@ -215,11 +273,25 @@ export default function Home() {
       {/* CTA Section */}
       <section className="bg-muted/40 py-20 border-t border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to get started?</h2>
-          <p className="text-lg text-muted-foreground mb-8">Join our community of happy shoppers today</p>
-          <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={(e) => e.preventDefault()}>
-            <Input type="email" placeholder="Your email address" className="flex-1 h-12 text-base" />
-            <Button size="lg" className="bg-primary hover:bg-primary/90 whitespace-nowrap">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            Ready to get started?
+          </h2>
+          <p className="text-lg text-muted-foreground mb-8">
+            Join our community of happy shoppers today
+          </p>
+          <form
+            className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+            onSubmit={(e) => e.preventDefault()}
+          >
+            <Input
+              type="email"
+              placeholder="Your email address"
+              className="flex-1 h-12 text-base"
+            />
+            <Button
+              size="lg"
+              className="bg-primary hover:bg-primary/90 whitespace-nowrap"
+            >
               Sign me up
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -318,5 +390,5 @@ export default function Home() {
         </div>
       </footer>
     </div>
-  )
+  );
 }

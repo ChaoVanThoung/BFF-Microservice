@@ -4,7 +4,9 @@
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$/Api-Gateway" />
     <file type="web" url="file://$PROJECT_DIR$/Eurekaserver" />
+    <file type="web" url="file://$PROJECT_DIR$/itp-identity-service" />
     <file type="web" url="file://$PROJECT_DIR$/product-service" />
+    <file type="web" url="file://$PROJECT_DIR$/spring-authorization-server" />
     <file type="web" url="file://$PROJECT_DIR$/user-service" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="graalvm-21" project-jdk-type="JavaSDK">
